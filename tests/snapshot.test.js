@@ -113,3 +113,23 @@ test("add_to_queue: should respect width and height params for long sites", asyn
   expect(metadata.width).toEqual(1280);
   expect(metadata.height).toEqual(720);
 });
+
+test("add_to_queue: should trim long sites", async () => {
+  let site = {
+    url: "http://127.0.0.1:3000/long-site.html",
+    file: tempFile,
+    width: 1280,
+    height: 720,
+  };
+
+  snapshot.add_to_queue(site);
+
+  // snapshot polls the queue every 1000ms and screenshots take some time
+  await sleep(4000);
+
+  const image = sharp(tempFile);
+  const metadata = await image.metadata();
+
+  expect(metadata.width).toBeLesserThan(1280);
+  expect(metadata.height).toBeLesserThan(720);
+});
